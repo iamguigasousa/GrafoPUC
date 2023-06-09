@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "568698614284",
+    "project_id": "grafo-4cdfc",
+    "storage_bucket": "grafo-4cdfc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:568698614284:android:07c32754b119a136ba7429",
+        "android_client_info": {
+          "package_name": "com.example.grafoprediopuc"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "568698614284-4327l3t3mnq0av73futrlhv57kcepc3u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDPsmakGP7dqhUVeb_5UB2ncKTqNavpVF4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "568698614284-4327l3t3mnq0av73futrlhv57kcepc3u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
