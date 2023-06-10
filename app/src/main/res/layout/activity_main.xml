@@ -7,34 +7,34 @@
     tools:context=".MainActivity">
 
     <EditText
-        android:id="@+id/sourceEditText"
+        android:id="@+id/et_source"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Prédio de origem"
         android:inputType="text" />
 
     <EditText
-        android:id="@+id/destinationEditText"
+        android:id="@+id/et_destination"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/sourceEditText"
+        android:layout_below="@id/et_source"
         android:layout_marginTop="8dp"
         android:hint="Prédio de destino"
         android:inputType="text" />
 
     <Button
-        android:id="@+id/calculateButton"
+        android:id="@+id/btn_calculate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/destinationEditText"
+        android:layout_below="@id/et_destination"
         android:layout_marginTop="16dp"
-        android:text="Calcular Caminho" />
+        android:text="Menor caminho" />
 
     <TextView
-        android:id="@+id/shortestPathTextView"
+        android:id="@+id/tv_shortestPath"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/calculateButton"
+        android:layout_below="@id/btn_calculate"
         android:layout_marginTop="16dp" />
 
 </RelativeLayout>

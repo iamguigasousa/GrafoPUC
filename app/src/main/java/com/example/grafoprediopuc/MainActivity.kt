@@ -5,35 +5,31 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.example.grafoprediopuc.databinding.ActivityMainBinding
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 
 class MainActivity : AppCompatActivity() {
     private lateinit var db: FirebaseFirestore
-    private lateinit var fromEditText: EditText
-    private lateinit var toEditText: EditText
-    private lateinit var calculateButton: Button
-    private lateinit var resultTextView: TextView
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
         // Inicialização do Firebase Firestore
         db = FirebaseFirestore.getInstance()
 
-        fromEditText = findViewById(R.id.sourceEditText)
-        toEditText = findViewById(R.id.destinationEditText)
-        calculateButton = findViewById(R.id.calculateButton)
-        resultTextView = findViewById(R.id.shortestPathTextView)
-
-        calculateButton.setOnClickListener { calculateShortestPath() }
+        binding.btnCalculate.setOnClickListener { calculateShortestPath() }
     }
 
     private fun calculateShortestPath() {
-        val from = fromEditText.text.toString()
-        val to = toEditText.text.toString()
+        val source = binding.etSource.text.toString().uppercase()
+        val destination = binding.etDestination.text.toString().uppercase()
 
         // Consulta ao Firestore para obter todos os prédios
         db.collection("prédios")
@@ -50,13 +46,13 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     // Chamada da função para calcular o caminho mais curto
-                    val shortestPath = dijkstra(buildingsMap, from, to)
+                    val shortestPath = dijkstra(buildingsMap, source, destination)
 
                     // Exibição do resultado na TextView
-                    resultTextView.text = "Caminho mais rápido: $shortestPath"
+                    binding.tvShortestPath.text = "Caminho mais rápido: $shortestPath"
                 } else {
                     // Tratamento de erro
-                    resultTextView.text = "Erro ao buscar os dados do Firestore."
+                    binding.tvShortestPath.text = "Erro ao buscar os dados do Firestore."
                 }
             }
     }
