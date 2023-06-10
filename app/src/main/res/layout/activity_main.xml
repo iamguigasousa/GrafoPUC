@@ -6,11 +6,13 @@
     android:padding="16dp"
     tools:context=".MainActivity">
 
+
     <EditText
         android:id="@+id/et_source"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Prédio de origem"
+        android:hint="@string/et_source"
+        android:layout_marginTop="250dp"
         android:inputType="text" />
 
     <EditText
@@ -19,7 +21,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/et_source"
         android:layout_marginTop="8dp"
-        android:hint="Prédio de destino"
+        android:hint="@string/et_destination"
         android:inputType="text" />
 
     <Button
@@ -27,8 +29,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/et_destination"
+        android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp"
-        android:text="Menor caminho" />
+        android:text="@string/btn_calculate" />
 
     <TextView
         android:id="@+id/tv_shortestPath"

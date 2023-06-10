@@ -1,3 +1,8 @@
 <resources>
-    <string name="app_name">GrafoPredioPUC</string>
+    <string name="app_name">Menor rota PUCC - Campus I</string>
+    <string name="et_source">Prédio de Origem</string>
+    <string name="et_destination">Prédio de Destino</string>
+    <string name="btn_calculate">Menor Caminho</string>
+
+
 </resources>
