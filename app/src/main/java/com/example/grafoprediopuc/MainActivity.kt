@@ -5,12 +5,14 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.QuerySnapshot
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var firestore: FirebaseFirestore
-    private lateinit var startBuildingEditText: EditText
-    private lateinit var endBuildingEditText: EditText
+    private lateinit var db: FirebaseFirestore
+    private lateinit var fromEditText: EditText
+    private lateinit var toEditText: EditText
     private lateinit var calculateButton: Button
     private lateinit var resultTextView: TextView
 
@@ -18,97 +20,97 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        firestore = FirebaseFirestore.getInstance()
+        // Inicialização do Firebase Firestore
+        db = FirebaseFirestore.getInstance()
 
-        startBuildingEditText = findViewById(R.id.sourceEditText)
-        endBuildingEditText = findViewById(R.id.destinationEditText)
+        fromEditText = findViewById(R.id.sourceEditText)
+        toEditText = findViewById(R.id.destinationEditText)
         calculateButton = findViewById(R.id.calculateButton)
         resultTextView = findViewById(R.id.shortestPathTextView)
 
-        calculateButton.setOnClickListener {
-            val startBuilding = startBuildingEditText.text.toString()
-            val endBuilding = endBuildingEditText.text.toString()
-
-            if (startBuilding.isNotEmpty() && endBuilding.isNotEmpty()) {
-                calculateShortestPath(startBuilding, endBuilding)
-            }
-        }
+        calculateButton.setOnClickListener { calculateShortestPath() }
     }
 
-    private fun calculateShortestPath(startBuilding: String, endBuilding: String) {
-        val buildingsCollection = firestore.collection("prédios")
+    private fun calculateShortestPath() {
+        val from = fromEditText.text.toString()
+        val to = toEditText.text.toString()
 
-        buildingsCollection.document(startBuilding).get()
-            .addOnSuccessListener { startBuildingDocument ->
-                if (startBuildingDocument != null && startBuildingDocument.exists()) {
-                    val startBuildingData = startBuildingDocument.data
-                    val adjacentBuildings = startBuildingData?.keys?.toList() ?: emptyList()
-                    val visitedBuildings = mutableSetOf(startBuilding)
-                    val distances = mutableMapOf(startBuilding to 0)
-                    val previousBuildings = mutableMapOf<String, String>()
+        // Consulta ao Firestore para obter todos os prédios
+        db.collection("prédios")
+            .get()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val documents: QuerySnapshot? = task.result
+                    val buildingsMap = HashMap<String, HashMap<String, Int>>()
 
-                    adjacentBuildings.forEach { building ->
-                        if (building != startBuilding) {
-                            distances[building] = Int.MAX_VALUE
-                        }
+                    for (document: DocumentSnapshot in documents!!) {
+                        val buildingName = document.id
+                        val adjacentBuildings = document.data as HashMap<String, Int>
+                        buildingsMap[buildingName] = adjacentBuildings
                     }
 
-                    while (visitedBuildings.size < adjacentBuildings.size) {
-                        var currentBuilding = ""
-                        var minDistance = Int.MAX_VALUE
+                    // Chamada da função para calcular o caminho mais curto
+                    val shortestPath = dijkstra(buildingsMap, from, to)
 
-                        distances.forEach { (building, distance) ->
-                            if (distance < minDistance && !visitedBuildings.contains(building)) {
-                                currentBuilding = building
-                                minDistance = distance
-                            }
-                        }
-
-                        if (currentBuilding.isEmpty()) {
-                            break
-                        }
-
-                        visitedBuildings.add(currentBuilding)
-                        buildingsCollection.document(currentBuilding).get()
-                            .addOnSuccessListener { currentBuildingDocument ->
-                                if (currentBuildingDocument != null && currentBuildingDocument.exists()) {
-                                    val currentBuildingData = currentBuildingDocument.data
-                                    val currentBuildingAdjacent = currentBuildingData?.keys?.toList()
-                                        ?: emptyList()
-
-                                    currentBuildingAdjacent.forEach { adjacent ->
-                                        val distance = currentBuildingData?.get(adjacent) as? Int
-                                        if (distance != null) {
-                                            val totalDistance = minDistance + distance
-                                            if (totalDistance < (distances[adjacent] ?: Int.MAX_VALUE)) {
-                                                distances[adjacent] = totalDistance
-                                                previousBuildings[adjacent] = currentBuilding
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                    }
-
-                    if (distances.containsKey(endBuilding)) {
-                        val shortestPath = mutableListOf<String>()
-                        var currentBuilding = endBuilding
-
-                        while (currentBuilding != startBuilding) {
-                            shortestPath.add(0, currentBuilding)
-                            currentBuilding = previousBuildings[currentBuilding] ?: ""
-                        }
-
-                        shortestPath.add(0, startBuilding)
-                        val totalTime = distances[endBuilding]
-                        val result = "Shortest Path: ${shortestPath.joinToString(" -> ")}, Time: $totalTime minutes"
-                        resultTextView.text = result
-                    } else {
-                        resultTextView.text = "No path found."
-                    }
+                    // Exibição do resultado na TextView
+                    resultTextView.text = "Caminho mais rápido: $shortestPath"
                 } else {
-                    resultTextView.text = "Start building not found."
+                    // Tratamento de erro
+                    resultTextView.text = "Erro ao buscar os dados do Firestore."
                 }
             }
+    }
+
+    private fun dijkstra(buildingsMap: HashMap<String, HashMap<String, Int>>, from: String, to: String): List<String> {
+        val distances = HashMap<String, Int>()
+        val previous = HashMap<String, String>()
+        val unvisited = HashSet<String>()
+
+        for (building in buildingsMap.keys) {
+            distances[building] = Int.MAX_VALUE
+            previous[building] = ""
+            unvisited.add(building)
+        }
+
+        distances[from] = 0
+
+        while (unvisited.isNotEmpty()) {
+            var currentBuilding = ""
+            var shortestDistance = Int.MAX_VALUE
+
+            for (building in unvisited) {
+                if (distances[building]!! < shortestDistance) {
+                    shortestDistance = distances[building]!!
+                    currentBuilding = building
+                }
+            }
+
+            if (currentBuilding == to) {
+                break
+            }
+
+            unvisited.remove(currentBuilding)
+
+            val adjacentBuildings = buildingsMap[currentBuilding]
+            if (adjacentBuildings != null) {
+                for (adjacentBuilding in adjacentBuildings.keys) {
+                    val distance = distances[currentBuilding]!! + adjacentBuildings[adjacentBuilding]!!
+
+                    if (distance < distances[adjacentBuilding]!!) {
+                        distances[adjacentBuilding] = distance
+                        previous[adjacentBuilding] = currentBuilding
+                    }
+                }
+            }
+        }
+
+        val shortestPath = mutableListOf<String>()
+        var currentBuilding = to
+        while (currentBuilding != "") {
+            shortestPath.add(0, currentBuilding)
+            currentBuilding = previous[currentBuilding]!!
+        }
+
+        return shortestPath
     }
 }
