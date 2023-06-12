@@ -46,12 +46,16 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     // Chamada da função para calcular o caminho mais curto
-                    val shortestPath = dijkstra(buildingsMap, source, destination)
-                    val totalTime = calculateTravelTime(buildingsMap, source, destination)
+                    try{
+                        val shortestPath = dijkstra(buildingsMap, source, destination)
+                        val totalTime = calculateTravelTime(buildingsMap, source, destination)
 
+                        // Exibição do resultado na TextView
+                        binding.tvShortestPath.text = "Caminho mais rápido: $shortestPath e o tempo a ser percorrido: $totalTime min"
+                    } catch (e: Exception) {
+                        binding.tvShortestPath.text = "Não é possível chegar até o local informado."
+                    }
 
-                    // Exibição do resultado na TextView
-                    binding.tvShortestPath.text = "Caminho mais rápido: $shortestPath e o tempo a ser percorrido: $totalTime min"
                 } else {
                     // Tratamento de erro
                     binding.tvShortestPath.text = "Erro ao buscar os dados do Firestore."
