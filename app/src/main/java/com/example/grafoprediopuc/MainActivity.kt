@@ -47,9 +47,11 @@ class MainActivity : AppCompatActivity() {
 
                     // Chamada da função para calcular o caminho mais curto
                     val shortestPath = dijkstra(buildingsMap, source, destination)
+                    val totalTime = calculateTravelTime(buildingsMap, source, destination)
+
 
                     // Exibição do resultado na TextView
-                    binding.tvShortestPath.text = "Caminho mais rápido: $shortestPath"
+                    binding.tvShortestPath.text = "Caminho mais rápido: $shortestPath e o tempo a ser percorrido: $totalTime min"
                 } else {
                     // Tratamento de erro
                     binding.tvShortestPath.text = "Erro ao buscar os dados do Firestore."
@@ -109,4 +111,58 @@ class MainActivity : AppCompatActivity() {
 
         return shortestPath
     }
+     private fun calculateTravelTime(buildingsMap: HashMap<String, HashMap<String, Int>>, source: String, destination: String): Int? {
+        val distances = HashMap<String, Int>()
+        val previous = HashMap<String, String>()
+        val unvisited = HashSet<String>()
+
+        for (building in buildingsMap.keys) {
+            distances[building] = Int.MAX_VALUE
+            previous[building] = ""
+            unvisited.add(building)
+        }
+
+        distances[source] = 0
+
+        while (unvisited.isNotEmpty()) {
+            var currentBuilding = ""
+            var shortestDistance = Int.MAX_VALUE
+
+            for (building in unvisited) {
+                if (distances[building]!! < shortestDistance) {
+                    shortestDistance = distances[building]!!
+                    currentBuilding = building
+                }
+            }
+
+            if (currentBuilding == destination) {
+                break
+            }
+
+            unvisited.remove(currentBuilding)
+
+            val adjacentBuildings = buildingsMap[currentBuilding]
+            if (adjacentBuildings != null) {
+                for (adjacentBuilding in adjacentBuildings.keys) {
+                    val distance = distances[currentBuilding]!! + adjacentBuildings[adjacentBuilding]!!
+
+                    if (distance < distances[adjacentBuilding]!!) {
+                        distances[adjacentBuilding] = distance
+                        previous[adjacentBuilding] = currentBuilding
+                    }
+                }
+            }
+        }
+
+        // Check if there is a valid path from source to destination
+        if (distances[destination] == Int.MAX_VALUE) {
+            return null
+        }
+
+        // Calculate travel time based on distance and average speed of 1 unit per minute
+        val travelTime = distances[destination]!!
+        return travelTime
+    }
+
+
 }
