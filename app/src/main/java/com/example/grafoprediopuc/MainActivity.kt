@@ -24,10 +24,10 @@ class MainActivity : AppCompatActivity() {
         // Inicialização do Firebase Firestore
         db = FirebaseFirestore.getInstance()
 
-        binding.btnCalculate.setOnClickListener { calculateShortestPath() }
+        binding.btnCalculate.setOnClickListener { calculateShortestPathAndTime() }
     }
 
-    private fun calculateShortestPath() {
+    private fun calculateShortestPathAndTime() {
         val source = binding.etSource.text.toString().uppercase()
         val destination = binding.etDestination.text.toString().uppercase()
 
@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
 
                     // Chamada da função para calcular o caminho mais curto
                     try{
-                        val shortestPath = dijkstra(buildingsMap, source, destination)
+                        val shortestPath = calculateDijkstra(buildingsMap, source, destination)
                         val totalTime = calculateTravelTime(buildingsMap, source, destination)
 
                         // Exibição do resultado na TextView
@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity() {
             }
     }
 
-    private fun dijkstra(buildingsMap: HashMap<String, HashMap<String, Int>>, from: String, to: String): List<String> {
+    private fun calculateDijkstra(buildingsMap: HashMap<String, HashMap<String, Int>>, from: String, to: String): List<String> {
         val distances = HashMap<String, Int>()
         val previous = HashMap<String, String>()
         val unvisited = HashSet<String>()
@@ -158,12 +158,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Check if there is a valid path from source to destination
         if (distances[destination] == Int.MAX_VALUE) {
             return null
         }
 
-        // Calculate travel time based on distance and average speed of 1 unit per minute
         val travelTime = distances[destination]!!
         return travelTime
     }
